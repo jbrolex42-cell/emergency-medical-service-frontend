@@ -74,7 +74,7 @@ export default function Home() {
               </h1>
 
               <p className="text-xl text-gray-300 mb-8 max-w-lg">
-                Uber-style dispatch connecting patients with the nearest qualified ambulance
+                Ems dispatch connecting patients with the nearest qualified ambulance
                 across Kenya. No cash required at scene with SHA integration.
               </p>
 

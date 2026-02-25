@@ -74,3 +74,6 @@
 .emergency-pulse {
   animation: emergency-pulse 2s infinite;
 }
+.btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed pointer-events-none transform-none shadow-none;
+}
