@@ -8,7 +8,8 @@ import {
   Menu, 
   X,
   HeartPulse,
-  MapPin
+  MapPin,
+  ShieldCheck // Added for Admin icon
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -24,12 +25,16 @@ export default function Layout() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+
   const navLinks = [
     { to: '/', label: 'Home', icon: MapPin },
     { to: '/emergency', label: 'Emergency', icon: Phone, emergency: true },
     ...(user ? [
       { to: '/dashboard', label: 'Dashboard', icon: User },
       { to: '/subscription', label: 'Subscription', icon: HeartPulse },
+    ] : []),
+    ...(user?.role === 'admin' ? [
+      { to: '/admin', label: 'Admin Panel', icon: ShieldCheck }
     ] : []),
   ]
 
@@ -43,6 +48,7 @@ export default function Layout() {
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+            
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 text-white">
               <div className="w-10 h-10 bg-gradient-to-br from-ems-accent to-blue-500 rounded-full flex items-center justify-center shadow-lg">
@@ -54,7 +60,7 @@ export default function Layout() {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - FIXED: added 'div' tag */}
             <div className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
@@ -85,7 +91,7 @@ export default function Layout() {
                     <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                       <User className="w-4 h-4" />
                     </div>
-                    <span className="text-sm font-medium">{user.name.split(' ')[0]}</span>
+                    <span className="text-sm font-medium">{user.name?.split(' ')[0]}</span>
                   </Link>
                   <button
                     onClick={logout}
@@ -97,16 +103,10 @@ export default function Layout() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 text-white/90 hover:text-white text-sm font-medium"
-                  >
+                  <Link to="/login" className="px-4 py-2 text-white/90 hover:text-white text-sm font-medium">
                     Sign in
                   </Link>
-                  <Link
-                    to="/register"
-                    className="px-4 py-2 bg-white text-ems-navy rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors"
-                  >
+                  <Link to="/register" className="px-4 py-2 bg-white text-ems-navy rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">
                     Register
                   </Link>
                 </div>
@@ -144,29 +144,21 @@ export default function Layout() {
                   {link.label}
                 </Link>
               ))}
-              
+
               {!user ? (
                 <div className="pt-2 border-t border-white/10 space-y-2">
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-4 py-3 text-white/90 hover:bg-white/10 rounded-xl"
-                  >
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-white/90 hover:bg-white/10 rounded-xl">
                     Sign in
                   </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-4 py-3 bg-white text-ems-navy rounded-xl font-semibold text-center"
-                  >
+                  <Link to="/register" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 bg-white text-ems-navy rounded-xl font-semibold text-center">
                     Register
                   </Link>
                 </div>
               ) : (
                 <button
                   onClick={() => {
-                    logout()
-                    setIsMenuOpen(false)
+                    logout();
+                    setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 rounded-xl"
                 >
@@ -220,21 +212,22 @@ export default function Layout() {
             <div>
               <h4 className="text-white font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-ems-accent">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-ems-accent">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-ems-accent">ODPC Compliance</a></li>
+                <li><Link to="#" className="hover:text-ems-accent">Privacy Policy</Link></li>
+                <li><Link to="#" className="hover:text-ems-accent">Terms of Service</Link></li>
+                <li><Link to="#" className="hover:text-ems-accent">ODPC Compliance</Link></li>
               </ul>
             </div>
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            © 2026 EMS Network. All rights.
-              ROLEX.O.O
-              <a href="https://www.instagram.com/irolex0?igsh=MTZ6NmlwamNidmE0NQ==">instagram</a>
-              <a href="https://www.instagram.com/irolex0/links/">Instagram Links</a>
+            <p>© 2026 EMS Network. All rights reserved. ROLEX.O.O</p>
+            <div className="flex justify-center gap-4 mt-2">
+              <a href="https://www.instagram.com/irolex0?igsh=MTZ6NmlwamNidmE0NQ==" className="hover:text-white">Instagram</a>
+              <a href="https://www.instagram.com/irolex0/links/" className="hover:text-white">Links</a>
+            </div>
           </div>
         </div>
       </footer>
     </div>
   );
-};
+}
