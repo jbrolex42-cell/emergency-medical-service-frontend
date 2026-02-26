@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://emergency-medical-backend.onrender.com/api',
+  baseURL: 'https://emergency-medical-backend.onrender.com',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
