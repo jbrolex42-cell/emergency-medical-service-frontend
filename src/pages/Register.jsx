@@ -1,373 +1,244 @@
-import React from 'react'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../stores/authStore'
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Lock, 
-  MapPin, 
-  Eye, 
-  EyeOff,
-  CheckCircle,
-  Ambulance
-} from 'lucide-react'
-import toast from 'react-hot-toast'
+import React, { useState, useRef } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuthStore } from "../stores/authStore"
+import toast from "react-hot-toast"
+import { User, Mail, Phone, Lock, Eye, EyeOff, CheckCircle } from "lucide-react"
 
-const KENYA_COUNTIES = [
-  'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
-  'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
-  'Kirinyaga', 'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia', 'Lamu', 'Machakos',
-  'Makueni', 'Mandera', 'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Murang\'a',
-  'Nairobi City', 'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua', 'Nyeri',
-  'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River', 'Tharaka-Nithi', 'Trans Nzoia',
-  'Turkana', 'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
-]
+/* ===============================
+ ENTERPRISE CONFIGURATION
+================================*/
 
-const steps = [
-  { id: 'account', title: 'Account' },
-  { id: 'personal', title: 'Personal' },
-  { id: 'complete', title: 'Complete' }
-]
+const PHONE_REGEX = /^(?:\+254|0)?7\d{8}$/
 
-export default function Register() {
-  const [currentStep, setCurrentStep] = useState('account')
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    role: 'patient',
-    county: '',
-    id_number: '',
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
-    blood_type: '',
-    allergies: ''
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const register = useAuthStore(state => state.register)
+const PASSWORD_REGEX =
+  /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/
+
+export default function Register(){
+
   const navigate = useNavigate()
+  const registerApi = useAuthStore(state=>state.register)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match')
-      return
+  const [form,setForm] = useState({
+    name:"",
+    email:"",
+    phone:"",
+    password:"",
+    confirmPassword:"",
+    role:"patient"
+  })
+
+  const [loading,setLoading] = useState(false)
+  const requestLock = useRef(false)
+  const [showPassword,setShowPassword] = useState(false)
+
+  /* ===============================
+   ENTERPRISE VALIDATION ENGINE
+  =================================*/
+
+  const validate = () => {
+
+    if(!form.name || !form.email || !form.phone){
+      toast.error("Required fields missing")
+      return false
     }
 
-    setIsLoading(true)
-    
-    const { confirmPassword, ...registerData } = formData
-    const result = await register(registerData)
-    
-    if (result.success) {
-      toast.success('Account created successfully!')
-      navigate('/subscription')
-    } else {
-      toast.error(result.error)
+    if(!PHONE_REGEX.test(form.phone)){
+      toast.error("Invalid Kenyan phone format")
+      return false
     }
-    
-    setIsLoading(false)
+
+    if(!PASSWORD_REGEX.test(form.password)){
+      toast.error("Password must be 6+ characters with numbers")
+      return false
+    }
+
+    if(form.password !== form.confirmPassword){
+      toast.error("Passwords do not match")
+      return false
+    }
+
+    return true
   }
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 'account':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="input-field pl-12"
-                  placeholder="ROLEX OCHIENG"
-                />
-              </div>
-            </div>
+  /* ===============================
+   ENTERPRISE SUBMISSION LOCK
+  =================================*/
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="input-field pl-12"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
+  const handleSubmit = async(e)=>{
+    e.preventDefault()
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="input-field pl-12"
-                  placeholder="07XX XXX XXX"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Format: 07XX XXX XXX or +254 7XX XXX XXX or 01XX XXX XXX</p>
-            </div>
+    if(loading || requestLock.current) return
+    if(!validate()) return
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="input-field pl-12 pr-12"
-                  placeholder="At least 6 characters"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
+    requestLock.current = true
+    setLoading(true)
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
-              <input
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="input-field"
-                placeholder="Confirm your password"
-              />
-            </div>
+    try{
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, role: 'patient' })}
-                  className={`p-4 rounded-xl border-2 text-center transition-all ${
-                    formData.role === 'patient'
-                      ? 'border-ems-navy bg-ems-navy/5'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <User className="w-6 h-6 mx-auto mb-2 text-ems-navy" />
-                  <div className="font-medium">Patient</div>
-                  <div className="text-xs text-gray-500">Emergency coverage</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, role: 'provider' })}
-                  className={`p-4 rounded-xl border-2 text-center transition-all ${
-                    formData.role === 'provider'
-                      ? 'border-ems-navy bg-ems-navy/5'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <Ambulance className="w-6 h-6 mx-auto mb-2 text-ems-navy" />
-                  <div className="font-medium">Provider</div>
-                  <div className="text-xs text-gray-500">EMS service provider</div>
-                </button>
-              </div>
-            </div>
+      const { confirmPassword,...payload } = form
 
-            <button
-              type="button"
-              onClick={() => setCurrentStep('personal')}
-              className="w-full btn-primary"
-            >
-              Continue
-            </button>
-          </div>
-        )
+      const result = await registerApi(payload)
 
-      case 'personal':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">County *</label>
-              <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <select
-                  required
-                  value={formData.county}
-                  onChange={(e) => setFormData({ ...formData, county: e.target.value })}
-                  className="input-field pl-12 appearance-none"
-                >
-                  <option value="">Select your county</option>
-                  {KENYA_COUNTIES.map(county => (
-                    <option key={county} value={county}>{county}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
+      if(result?.success){
+        toast.success("Account created")
+        navigate("/subscription")
+      }else{
+        toast.error(result?.error || "Registration failed")
+      }
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">ID Number</label>
-              <input
-                type="text"
-                value={formData.id_number}
-                onChange={(e) => setFormData({ ...formData, id_number: e.target.value })}
-                className="input-field"
-                placeholder="National ID or Passport"
-              />
-            </div>
-
-            <div className="border-t pt-4">
-              <h4 className="font-medium text-gray-900 mb-3">Emergency Contact</h4>
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  value={formData.emergency_contact_name}
-                  onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
-                  className="input-field"
-                  placeholder="Contact Name"
-                />
-                <input
-                  type="tel"
-                  value={formData.emergency_contact_phone}
-                  onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
-                  className="input-field"
-                  placeholder="Contact Phone"
-                />
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <h4 className="font-medium text-gray-900 mb-3">Medical Information (Optional)</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={formData.blood_type}
-                  onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
-                  className="input-field"
-                >
-                  <option value="">Blood Type</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                </select>
-                <input
-                  type="text"
-                  value={formData.allergies}
-                  onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
-                  className="input-field"
-                  placeholder="Known Allergies"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCurrentStep('account')}
-                className="flex-1 btn-secondary"
-              >
-                Back
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 btn-primary flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Create Account
-                    <CheckCircle className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )
-
-      default:
-        return null
+    }catch(error){
+      console.error("Signup Error:",error)
+      toast.error("Server connection error")
     }
+
+    requestLock.current = false
+    setLoading(false)
+  }
+
+  /* ===============================
+   SAFE STATE UPDATE
+  =================================*/
+
+  const updateField = (field,value)=>{
+    setForm(prev=>({
+      ...prev,
+      [field]:value
+    }))
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4">
-      <div className="max-w-lg mx-auto">
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-8">
-          {steps.map((step, idx) => (
-            <div key={step.id} className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                currentStep === step.id
-                  ? 'bg-ems-navy text-white'
-                  : idx < steps.findIndex(s => s.id === currentStep)
-                  ? 'bg-ems-accent text-white'
-                  : 'bg-gray-200 text-gray-500'
-              }`}>
-                {idx < steps.findIndex(s => s.id === currentStep) ? (
-                  <CheckCircle className="w-5 h-5" />
-                ) : (
-                  idx + 1
-                )}
-              </div>
-              <span className={`ml-2 text-sm font-medium ${
-                currentStep === step.id ? 'text-ems-navy' : 'text-gray-500'
-              }`}>
-                {step.title}
-              </span>
-              {idx < steps.length - 1 && (
-                <div className="w-12 h-0.5 mx-4 bg-gray-200"></div>
-              )}
-            </div>
-          ))}
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 p-6">
 
-        <div className="card">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Create Your Account</h1>
-            <p className="text-gray-600 mt-1">
-              {currentStep === 'account' ? 'Start with your basic information' : 'Tell us more about yourself'}
-            </p>
-          </div>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-          <form onSubmit={handleSubmit}>
-            {renderStep()}
-          </form>
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Enterprise Account Setup
+        </h1>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-ems-navy font-semibold hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          <InputField
+            icon={<User/>}
+            label="Full Name"
+            value={form.name}
+            onChange={v=>updateField("name",v)}
+          />
+
+          <InputField
+            icon={<Mail/>}
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={v=>updateField("email",v)}
+          />
+
+          <InputField
+            icon={<Phone/>}
+            label="Phone (+254 format)"
+            value={form.phone}
+            onChange={v=>updateField("phone",v)}
+          />
+
+          <PasswordField
+            label="Password"
+            value={form.password}
+            show={showPassword}
+            toggle={()=>setShowPassword(!showPassword)}
+            onChange={v=>updateField("password",v)}
+          />
+
+          <InputField
+            label="Confirm Password"
+            type="password"
+            value={form.confirmPassword}
+            onChange={v=>updateField("confirmPassword",v)}
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2 transition"
+          >
+            {loading ? <Spinner/> : <>
+              Create Enterprise Account
+              <CheckCircle size={18}/>
+            </>}
+          </button>
+
+        </form>
+
+        <p className="text-center text-sm mt-6">
+          Already have account?
+          <Link to="/login" className="text-blue-600 ml-1 font-semibold">
+            Login
+          </Link>
+        </p>
+
       </div>
     </div>
+  )
+}
+
+/* ===============================
+ REUSABLE COMPONENTS
+================================*/
+
+function InputField({icon,label,value,onChange,type="text"}){
+
+  return (
+    <div>
+      <label className="text-sm font-medium block mb-2">
+        {label}
+      </label>
+
+      <div className="relative">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          {icon}
+        </div>
+
+        <input
+          type={type}
+          value={value}
+          onChange={e=>onChange(e.target.value)}
+          className="w-full border rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+    </div>
+  )
+}
+
+function PasswordField({label,value,onChange,show,toggle}){
+
+  return (
+    <div>
+      <label className="text-sm font-medium block mb-2">
+        {label}
+      </label>
+
+      <div className="relative">
+
+        <input
+          type={show ? "text":"password"}
+          value={value}
+          onChange={e=>onChange(e.target.value)}
+          className="w-full border rounded-xl py-3 pr-12 pl-4 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
+        <button
+          type="button"
+          onClick={toggle}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+        >
+          {show ? <EyeOff/> : <Eye/>}
+        </button>
+
+      </div>
+    </div>
+  )
+}
+
+function Spinner(){
+  return (
+    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
   )
 }
