@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './stores/authStore';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -30,7 +30,6 @@ function App() {
   const { user } = useAuthStore();
 
   return (
-    <BrowserRouter>
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home />} />
@@ -71,7 +70,6 @@ function App() {
         {/* 404 / CATCH ALL */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 
