@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import React,{ useState, useEffect } from "react"
 import { useAuthStore } from "../stores/authStore"
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import "leaflet/dist/leaflet.css"

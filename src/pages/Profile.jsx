@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import { User, Mail, Phone, MapPin, Save } from 'lucide-react'
 import toast from 'react-hot-toast'

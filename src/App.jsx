@@ -33,6 +33,7 @@ function App() {
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home />} />
+        <Route path="/emergency" element={<Emergency />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         
         {/* AUTH ROUTES (Redirect to dashboard if already logged in) */}
@@ -44,7 +45,6 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/subscription" element={<Subscription />} />
-          <Route path="/emergency" element={<Emergency />} />
         </Route>
 
         {/* PROVIDER ONLY ROUTES */}
