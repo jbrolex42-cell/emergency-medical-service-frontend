@@ -50,33 +50,32 @@ export const useAuthStore = create(
       },
 
       register: async (userData) => {
-        try {
-          const response = await api.post('/auth/register', userData)
+  try {
+    const response = await api.post('/auth/register', userData)
 
-          console.log('REGISTER RESPONSE:', response.data)
+    console.log('REGISTER RESPONSE:', response.data)
 
-          const payload = response.data?.data || response.data
+    const payload = response.data?.data || response.data
 
-          if (!payload?.user || !payload?.token) {
-            throw new Error('Invalid server response from backend')
-          }
+    // Remove strict validation (IMPORTANT FIX)
+    if (payload?.token) {
+      get().setAuth(payload.user, payload.token)
+    }
 
-          get().setAuth(payload.user, payload.token)
+    return { success: true }
+  } catch (error) {
+    console.log(error)
 
-          return { success: true }
-        } catch (error) {
-          console.log(error)
-
-          return {
-            success: false,
-            error:
-              error.response?.data?.error ||
-              error.message ||
-              'Registration failed'
-          }
-        }
-      },
-
+    return {
+      success: false,
+      error:
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        'Registration failed'
+    }
+  }
+},
       logout: () => {
         get().clearAuth()
       },
