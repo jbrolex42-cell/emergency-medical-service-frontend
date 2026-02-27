@@ -90,7 +90,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="input-field pl-12"
-                  placeholder="John Doe"
+                  placeholder="Rolex Ochieng"
                 />
               </div>
             </div>
