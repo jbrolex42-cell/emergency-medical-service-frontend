@@ -51,20 +51,25 @@ export const useAuthStore = create(
 
       register: async (userData) => {
   try {
+
     const response = await api.post('/auth/register', userData)
 
     console.log('REGISTER RESPONSE:', response.data)
 
     const payload = response.data?.data || response.data
 
-    // Remove strict validation (IMPORTANT FIX)
-    if (payload?.token) {
-      get().setAuth(payload.user, payload.token)
+    // Backend may NOT send token during registration
+    if (payload?.user && payload?.tokens?.accessToken) {
+
+      get().setAuth(
+        payload.user,
+        payload.tokens.accessToken
+      )
     }
 
     return { success: true }
+
   } catch (error) {
-    console.log(error)
 
     return {
       success: false,
