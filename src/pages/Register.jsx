@@ -123,7 +123,7 @@ export default function Register() {
                   placeholder="07XX XXX XXX"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Format: 07XX XXX XXX or +254 7XX XXX XXX or 01XX XXX XXX</p>
+              <p className="text-xs text-gray-500 mt-1">Format: 07XX XXX XXX or +254 7XX XXX XXX or </p>
             </div>
 
             <div>
