@@ -133,11 +133,11 @@ export default function Register() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  minLength={6}
+                  minLength={8}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="input-field pl-12 pr-12"
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters"
                 />
                 <button
                   type="button"
