@@ -53,27 +53,50 @@ export default function Register() {
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match')
-      return
+  e.preventDefault()
+
+  if (formData.password !== formData.confirmPassword) {
+    toast.error('Passwords do not match')
+    return
+  }
+
+  setIsLoading(true)
+
+  try {
+
+    const nameParts = formData.name.trim().split(' ')
+
+    const registerData = {
+      email: formData.email,
+      password: formData.password,
+
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || 'User',
+
+      phone: formData.phone.startsWith('+254')
+        ? formData.phone
+        : '+254' + formData.phone.replace(/^0/, ''),
+
+      idNumber: formData.id_number || ''
     }
 
-    setIsLoading(true)
-    
-    const { confirmPassword, ...registerData } = formData
     const result = await register(registerData)
-    
+
     if (result.success) {
       toast.success('Account created successfully!')
       navigate('/subscription')
     } else {
-      toast.error(result.error)
+      toast.error(result.error || 'Registration failed')
     }
-    
+
+  } catch (error) {
+    console.error(error)
+    toast.error('Unexpected registration error')
+
+  } finally {
     setIsLoading(false)
   }
+}
 
   const renderStep = () => {
     switch (currentStep) {
